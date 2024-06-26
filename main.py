@@ -3,7 +3,7 @@ from random import shuffle
 
 
 def clear_console() -> None:
-    os.system("cls || clear")
+    os.system("clear")
 
 
 class Deck:
@@ -76,6 +76,16 @@ class Dealer:
         hand.cards.append(card)
         hand.get_score(card)
 
+    def get_dealer_score(self):
+        card = self.hand.cards[0]
+
+        if card[1] == "Ace":
+            return 11
+        elif card[1] in ["King", "Queen", "Jack"]:
+            return 10
+        else:
+            return int(card[1])
+
 
 def main():
     deck = Deck()
@@ -88,11 +98,11 @@ def main():
 
         while player.under_21:
             print(f"Score: {player.score}, Cards: {player.cards}")
-            print(f"Score: {dealer.hand.score}, Cards: {dealer.hand.cards[0]}")
+            print(f"Score: {dealer.get_dealer_score()} Cards: {dealer.hand.cards[0]}\n")
             user_input = input(f"Enter: \n")
 
             if user_input == "h":
-                dealer.draw_card(player.cards)
+                dealer.draw_card(player)
 
             if user_input == "s":
                 break
@@ -100,6 +110,36 @@ def main():
             clear_console()
 
             player.under_21 = player.check_valid_hand()
+
+        while player.under_21 and dealer.hand.under_21:
+            print(f"Score: {player.score}, Cards: {player.cards}")
+            print(f"Score: {dealer.hand.score}, Cards: {dealer.hand.cards}\n")
+
+            if dealer.hand.score < 17:
+                dealer.draw_card(dealer.hand)
+                continue
+
+            if dealer.hand.score == 21 or (
+                dealer.hand.score >= 17 and dealer.hand.score <= 21
+            ):
+                break
+
+            if dealer.hand.score > 21:
+                dealer.hand.under_21 = dealer.hand.check_valid_hand()
+                break
+
+            clear_console()
+
+        if not player.under_21:
+            print("Dealer Wins!\n")
+        elif not dealer.hand.under_21:
+            print("Player Wins!\n")
+        elif player.score > dealer.hand.score:
+            print("Player Wins!\n")
+        elif player.score == dealer.hand.score:
+            print("Table was a push!\n")
+        else:
+            print("Dealer Wins!\n")
 
         user_input = input(f"Continue?:\n")
 
